@@ -25,7 +25,7 @@ jobs:
     - name: Deploy to App Engine
       run: |
         # Create app.yaml file for App Engine
-        echo "runtime: nodejs16
+        echo "runtime: nodejs22
         env: standard
         instance_class: F1" > app.yaml
         
