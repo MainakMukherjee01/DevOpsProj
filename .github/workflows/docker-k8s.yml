@@ -5,30 +5,30 @@ on:
     branches: [ main ]
 
 jobs:
-#   SecurityQuality:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0  # Needed for SonarCloud analysis
+  SecurityQuality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Needed for SonarCloud analysis
 
-#       - name: Install Dependencies
-#         run: npm install
+      - name: Install Dependencies
+        run: npm install
 
-#       - name: Run Vulnerability Scan (npm audit)
-#         run: npm audit
+      - name: Run Vulnerability Scan (npm audit)
+        run: npm audit
 
-#       - name: Run ESLint for Code Quality
-#         run: npx eslint .
+      - name: Run ESLint for Code Quality
+        run: npx eslint .
 
-#       - name: Run Tests with Coverage
-#         run: npm test -- --coverage
+      - name: Run Tests with Coverage
+        run: npm test -- --coverage
         
-#       - name: SonarCloud Scan
-#         uses: sonarsource/sonarqube-scan-action@v5
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarqube-scan-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   Build:
     runs-on: ubuntu-latest
     steps:
@@ -108,11 +108,11 @@ jobs:
       - name: Wait for deployment
         run: |
           kubectl get pods
-          sleep 300
+          sleep 30
+          kubectl rollout status deployment/nodejs-app --timeout=30s
+          POD=$(kubectl get pods -l app=nodejs-app -o jsonpath="{.items[0].metadata.name}")
           echo "Pod name: $POD"
           kubectl describe pod $POD
-          kubectl logs $POD
-
 
   Verify:
     runs-on: ubuntu-latest
@@ -126,7 +126,7 @@ jobs:
       - name: Wait for Pod to be Ready
         run: |
           # Wait until at least one pod with label app=nodejs-app is ready (timeout after 300 seconds)
-          kubectl rollout status deployment/nodejs-app --timeout=300s
+          kubectl rollout status deployment/nodejs-app --timeout=30s
 
       - name: Get Pod Details and Logs
         run: |
@@ -140,9 +140,6 @@ jobs:
           # Describe the pod to see detailed status and events
           kubectl describe pod $POD
 
-          # Output the logs of the pod
-          kubectl logs $POD
-
   Test:
     runs-on: ubuntu-latest
     needs: Verify  # This job runs after the verify job completes
@@ -155,6 +152,8 @@ jobs:
           kubectl port-forward svc/nodejs-app-service 3000:80 &
           sleep 5
           curl -s http://localhost:3000/health
+          npm test
+          echo "Application tests completed."
       
       # Clean up
       - name: Clean up K3d cluster
