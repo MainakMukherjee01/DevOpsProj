@@ -10,32 +10,42 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm install
 
-      - name: Run npm audit for vulnerabilities
+      - name: Run Vulnerability Scan (npm audit)
         run: npm audit
 
-      - name: Run ESLint for code quality
+      - name: Run ESLint for Code Quality
         run: npx eslint .
 
-      - name: Run tests with coverage
+      - name: Run Tests with Coverage
         run: npm test -- --coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+  # SonarCloud Analysis
+  SonarCheck:
+    runs-on: ubuntu-latest
+    needs: SecurityCheck
+    steps:
+      - uses: actions/checkout@v3
 
-      # Optional: Run CodeQL analysis for advanced security scanning
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          languages: javascript
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+          node-version: '16'
+
+      - name: Run SonarCloud Analysis
+        uses: SonarSource/sonarcloud-github-action@v1
+        with:
+          organization: ${{ secrets.SONAR_ORGANIZATION }}
+          projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+          projectName: multi-cloud-cicd-demo
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   Init:
     runs-on: ubuntu-latest
-    needs: SecurityCheck
+    needs: SonarCheck
     steps:
       - uses: actions/checkout@v3
       - name: AWS Init
