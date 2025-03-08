@@ -118,9 +118,10 @@ jobs:
         run: |
           kubectl port-forward svc/nodejs-app-service 3000:80 &
           sleep 5
+          npm install
           curl -s http://localhost:3000/health
           curl -s http://localhost:3000/
-          npm test
+          npm test -- --coverage
           echo "Application tests completed."
       
       # Clean up
