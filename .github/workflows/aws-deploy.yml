@@ -6,23 +6,42 @@ on:
     branches: [ main ]
 
 jobs:
+  init:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: AWS Init
+        run: echo "Initializing AWS deployment..."
+
+  build:
+    runs-on: ubuntu-latest
+    needs: init
+    steps:
+      - uses: actions/checkout@v3
+      - name: Generate deployment package
+        run: zip -r deploy.zip * -x "*.git*"
+
+  stage:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - name: AWS Stage
+        run: echo "Staging AWS deployment..."
+
   deploy:
     runs-on: ubuntu-latest
-    
+    needs: stage
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Generate deployment package
-      run: zip -r deploy.zip * -x "*.git*"
-      
-    - name: Deploy to Elastic Beanstalk
-      uses: einaregilsson/beanstalk-deploy@v21
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: multi-cloud-cicd-demo
-        environment_name: multi-cloud-cicd-demo-env
-        region: ap-south-1
-        version_label: ${{ github.sha }}
-        deployment_package: deploy.zip
-        wait_for_environment_recovery: 60
+      - uses: actions/checkout@v3
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: multi-cloud-cicd-demo
+          environment_name: multi-cloud-cicd-demo-env
+          region: ap-south-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip
+          wait_for_environment_recovery: 60

@@ -1,3 +1,4 @@
+# .github/workflows/gcp-deploy.yml
 name: Deploy to Google Cloud
 
 on:
@@ -5,29 +6,46 @@ on:
     branches: [ main ]
 
 jobs:
+  init:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: GCP Init
+        run: echo "Initializing GCP deployment..."
+
+  build:
+    runs-on: ubuntu-latest
+    needs: init
+    steps:
+      - uses: actions/checkout@v3
+      - name: GCP Build
+        run: echo "No build step required for GCP App Engine deployment"
+
+  stage:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - name: GCP Stage
+        run: echo "Staging GCP deployment..."
+
   deploy:
     runs-on: ubuntu-latest
-    
+    needs: stage
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Authenticate to Google Cloud
-      id: auth
-      uses: google-github-actions/auth@v1
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
-    
-    - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-    
-    - name: Deploy to App Engine
-      run: |
-        # Create app.yaml file for App Engine
-        echo "runtime: nodejs22
-        env: standard
-        instance_class: F1" > app.yaml
-        
-        # Deploy to App Engine
-        gcloud app deploy --quiet
+      - uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Deploy to App Engine
+        run: |
+          echo "runtime: nodejs22
+          env: standard
+          instance_class: F1" > app.yaml
+          gcloud app deploy --quiet
