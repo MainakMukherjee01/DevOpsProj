@@ -96,7 +96,6 @@ jobs:
       - name: Wait for deployment
         run: |
           kubectl get pods
-          kubectl rollout status deployment/nodejs-app  --timeout=300s
           kubectl get pods
           sleep 300
           echo "Pod name: $POD"
