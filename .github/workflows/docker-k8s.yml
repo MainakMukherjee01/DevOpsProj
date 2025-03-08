@@ -87,6 +87,14 @@ jobs:
           echo "Updating Kubernetes manifest with the new image..."
           sed -i 's|IMAGE_TO_REPLACE|ghcr.io/${{ env.REPO }}:${{ github.sha }}|g' k8s/deployment.yaml
           echo "Kubernetes manifest updated successfully."
+
+      - name: Generate SECRET_KEY
+        run: |
+          kubectl create secret docker-registry regcred \
+          --docker-server=ghcr.io \
+          --docker-username=${{ github.actor }} \
+          --docker-password=${{ secrets.GHCR_TOKEN }} \
+          --docker-email=${{ github.actor.email }}
       
       # Apply the Kubernetes manifests
       - name: Deploy to K3d
