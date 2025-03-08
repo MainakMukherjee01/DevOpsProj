@@ -58,7 +58,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  Deploy:
+  DeployVerify:
     runs-on: ubuntu-latest
     needs: Build
     steps:
@@ -109,47 +109,9 @@ jobs:
       - name: Wait for deployment
         run: |
           kubectl get pods
-          sleep 30
-          kubectl rollout status deployment/nodejs-app --timeout=30s
+          kubectl rollout status deployment/nodejs-app --timeout=60s
           POD=$(kubectl get pods -l app=nodejs-app -o jsonpath="{.items[0].metadata.name}")
           echo "Pod name: $POD"
-          kubectl describe pod $POD
-
-  Verify:
-    runs-on: ubuntu-latest
-    needs: Deploy  # This job runs after your deployment job completes
-    steps:
-      - name: Set up Kubectl
-        uses: azure/setup-kubectl@v4  # or another kubectl setup action
-        with:
-          version: latest
-        id: install
-
-      - name: Install K3d
-        run: |
-          echo "Installing K3d..."
-          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-          echo "K3d installed successfully."
-
-      - name: Get kubeconfig
-        run: |
-          echo "Configuring kubectl to use the K3d cluster..."
-          mkdir -p ~/.kube
-          k3d kubeconfig get test-cluster > ~/.kube/config
-          export KUBECONFIG=~/.kube/config
-          kubectl config use-context k3d-test-cluster
-          echo "kubectl configured successfully."
-
-      - name: Get Pod Details and Logs
-        run: |
-          # List all pods
-          kubectl get pods
-
-          # Retrieve the name of the pod with label app=nodejs-app
-          POD=$(kubectl get pods -l app=nodejs-app -o jsonpath="{.items[0].metadata.name}")
-          echo "Pod name: $POD"
-
-          # Describe the pod to see detailed status and events
           kubectl describe pod $POD
 
   Test:
