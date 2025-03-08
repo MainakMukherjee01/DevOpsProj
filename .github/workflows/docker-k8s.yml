@@ -124,11 +124,6 @@ jobs:
         with:
           version: latest
         id: install
-    
-      - name: Wait for Pod to be Ready
-        run: |
-          # Wait until at least one pod with label app=nodejs-app is ready (timeout after 300 seconds)
-          kubectl rollout status deployment/nodejs-app --timeout=30s
 
       - name: Get Pod Details and Logs
         run: |
