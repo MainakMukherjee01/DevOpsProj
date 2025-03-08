@@ -31,6 +31,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   Build:
     runs-on: ubuntu-latest
+    needs: SecurityQuality
     steps:
       - uses: actions/checkout@v3
       
@@ -119,9 +120,10 @@ jobs:
     needs: Deploy  # This job runs after your deployment job completes
     steps:
       - name: Set up Kubectl
-        uses: azure/setup-kubectl@v3  # or another kubectl setup action
+        uses: azure/setup-kubectl@v4  # or another kubectl setup action
         with:
-          version: '1.26.0'
+          version: latest
+        id: install
     
       - name: Wait for Pod to be Ready
         run: |
@@ -152,6 +154,7 @@ jobs:
           kubectl port-forward svc/nodejs-app-service 3000:80 &
           sleep 5
           curl -s http://localhost:3000/health
+          curl -s http://localhost:3000/
           npm test
           echo "Application tests completed."
       
