@@ -1,4 +1,3 @@
-# .github/workflows/azure-deploy.yml
 name: Deploy to Azure
 
 on:
@@ -6,8 +5,32 @@ on:
     branches: [ main ]
 
 jobs:
+  SecurityQuality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Vulnerability Scan (npm audit)
+        run: npm audit
+
+      - name: Run ESLint for Code Quality
+        run: npx eslint .
+
+      - name: Run Tests with Coverage
+        run: npm test -- --coverage
+        
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   Init:
     runs-on: ubuntu-latest
+    needs: SecurityQuality
     steps:
       - uses: actions/checkout@v3
       - name: Azure Init
