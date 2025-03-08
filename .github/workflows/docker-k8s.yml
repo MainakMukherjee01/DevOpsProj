@@ -100,8 +100,6 @@ jobs:
       - name: Wait for deployment
         run: |
           kubectl get pods
-          kubectl rollout status deployment/nodejs-app --timeout=30s
-          kubectl get pods
           sleep 300
           echo "Pod name: $POD"
           kubectl describe pod $POD
@@ -120,7 +118,7 @@ jobs:
       - name: Wait for Pod to be Ready
         run: |
           # Wait until at least one pod with label app=nodejs-app is ready (timeout after 300 seconds)
-          kubectl rollout status deployment/nodejs-app --timeout=30s
+          kubectl rollout status deployment/nodejs-app --timeout=300s
 
       - name: Get Pod Details and Logs
         run: |
