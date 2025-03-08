@@ -33,11 +33,15 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Set up Java 17
+      - name: Set up Java 21
+        id: setup_java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
+
+      - name: Verify Java Version
+        run: java -version
 
       - name: Run SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@v1
@@ -46,6 +50,7 @@ jobs:
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.projectName=multi-cloud-cicd-demo
+            -Dsonar.java.jdkHome=${{ steps.setup_java.outputs.java-home }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
