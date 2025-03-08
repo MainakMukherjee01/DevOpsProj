@@ -87,23 +87,31 @@ jobs:
           echo "Updating Kubernetes manifest with the new image..."
           sed -i 's|IMAGE_TO_REPLACE|ghcr.io/${{ env.REPO }}:${{ github.sha }}|g' k8s/deployment.yaml
           echo "Kubernetes manifest updated successfully."
+
+      - name: Generate Secret Key
+        run: |
+          echo "Updating Kubernetes manifest with the new image..."
+          sed -i 's|IMAGE_TO_REPLACE|ghcr.io/${{ env.REPO }}:${{ github.sha }}|g' k8s/deployment.yaml
+          echo "Kubernetes manifest updated successfully."
       
       # Apply the Kubernetes manifests
       - name: Deploy to K3d
         run: |
-          echo "Applying Kubernetes manifests..."
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          echo "Kubernetes manifests applied successfully."
+          kubectl create secret docker-registry regcred \
+          --docker-server=ghcr.io \
+          --docker-username=${{ github.actor }} \
+          --docker-password=${{ secrets.GHCR_TOKEN }} \
+          --docker-email=${{ github.actor.email }}
       
       # Wait for the deployment to become ready
       - name: Wait for deployment
         run: |
           kubectl get pods
           sleep 300
+          POD=$(kubectl get pods -l app=nodejs-app -o jsonpath="{.items[0].metadata.name}")
           echo "Pod name: $POD"
           kubectl describe pod $POD
-          kubectl logs $POD
+          kubectl logs pod $POD
 
 
   Verify:
