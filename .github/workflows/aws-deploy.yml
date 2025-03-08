@@ -5,8 +5,37 @@ on:
     branches: [ main ]
 
 jobs:
+  SecurityCheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run npm audit for vulnerabilities
+        run: npm audit
+
+      - name: Run ESLint for code quality
+        run: npx eslint .
+
+      - name: Run tests with coverage
+        run: npm test -- --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+
+      # Optional: Run CodeQL analysis for advanced security scanning
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
   Init:
     runs-on: ubuntu-latest
+    needs: SecurityCheck
     steps:
       - uses: actions/checkout@v3
       - name: AWS Init
