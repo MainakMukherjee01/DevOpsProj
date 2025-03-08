@@ -125,6 +125,15 @@ jobs:
           version: latest
         id: install
 
+      - name: Get kubeconfig
+        run: |
+          echo "Configuring kubectl to use the K3d cluster..."
+          mkdir -p ~/.kube
+          k3d kubeconfig get test-cluster > ~/.kube/config
+          export KUBECONFIG=~/.kube/config
+          kubectl config use-context k3d-test-cluster
+          echo "kubectl configured successfully."
+          
       - name: Get Pod Details and Logs
         run: |
           # List all pods
