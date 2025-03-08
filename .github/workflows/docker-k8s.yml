@@ -98,8 +98,10 @@ jobs:
           kubectl get pods
           kubectl rollout status deployment/nodejs-app  --timeout=300s
           kubectl get pods
+          sleep 300
+          echo "Pod name: $POD"
           kubectl describe pod $POD
-
+          kubectl logs $POD
 
 
   Verify:
