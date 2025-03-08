@@ -96,7 +96,9 @@ jobs:
       - name: Wait for deployment
         run: |
           kubectl get pods
-          kubectl rollout status deployment/nodejs-app --timeout=30s
+          kubectl rollout status deployment/nodejs-app
+          kubectl get pods
+          kubectl describe pod $POD
 
 
 
