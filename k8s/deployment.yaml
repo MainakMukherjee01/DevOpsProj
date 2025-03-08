@@ -2,8 +2,15 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nodejs-app
+  labels:
+    app: nodejs-app
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
   selector:
     matchLabels:
       app: nodejs-app
@@ -14,19 +21,29 @@ spec:
     spec:
       containers:
       - name: nodejs-app
-        image: IMAGE_TO_REPLACE
+        image: IMAGE_TO_REPLACE  
         ports:
         - containerPort: 3000
         resources:
-          limits:
-            cpu: "0.5"
-            memory: "256Mi"
           requests:
-            cpu: "0.1"
+            cpu: "100m"
             memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
         livenessProbe:
           httpGet:
             path: /health
             port: 3000
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
