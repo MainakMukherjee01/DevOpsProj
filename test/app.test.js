@@ -8,3 +8,13 @@ describe('GET /', () => {
     expect(res.text).toBe('Hello, Updated Multi-Cloud CI/CD!');
   });
 });
+
+describe('GET /health', () => {
+  it('Should respond with a health check object', async () => {
+    const res = await request(app).get('/health');
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('uptime');
+    expect(res.body).toHaveProperty('message', 'OK');
+    expect(res.body).toHaveProperty('timestamp');
+  });
+});
