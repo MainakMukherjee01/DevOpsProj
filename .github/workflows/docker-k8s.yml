@@ -94,7 +94,7 @@ jobs:
       
       # Wait for the deployment to become ready
       - name: Wait for deployment
-        run: kubectl rollout status deployment/nodejs-app --timeout=30s
+        run: kubectl rollout status
 
   Verify:
     runs-on: ubuntu-latest
