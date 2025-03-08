@@ -125,6 +125,12 @@ jobs:
           version: latest
         id: install
 
+      - name: Install K3d
+        run: |
+          echo "Installing K3d..."
+          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+          echo "K3d installed successfully."
+
       - name: Get kubeconfig
         run: |
           echo "Configuring kubectl to use the K3d cluster..."
@@ -133,7 +139,7 @@ jobs:
           export KUBECONFIG=~/.kube/config
           kubectl config use-context k3d-test-cluster
           echo "kubectl configured successfully."
-          
+
       - name: Get Pod Details and Logs
         run: |
           # List all pods
