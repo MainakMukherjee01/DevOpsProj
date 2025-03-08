@@ -76,12 +76,16 @@ jobs:
         run: |
           mkdir -p ~/.kube
           k3d kubeconfig get test-cluster > ~/.kube/config
+
+      - name: Set lowercase repository name
+        id: setrepo
+        run: echo "REPO=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
       
       # Update the image in the Kubernetes manifest
       - name: Update manifest
         run: |
           echo "Updating Kubernetes manifest with the new image..."
-          sed -i 's|IMAGE_TO_REPLACE|ghcr.io/${{ github.repository }}:${{ github.sha }}|g' k8s/deployment.yaml
+          sed -i 's|IMAGE_TO_REPLACE|ghcr.io/${{ env.REPO }}:${{ github.sha }}|g' k8s/deployment.yaml
           echo "Kubernetes manifest updated successfully."
       
       # Apply the Kubernetes manifests
@@ -96,6 +100,7 @@ jobs:
       - name: Wait for deployment
         run: |
           kubectl get pods
+          kubectl rollout status deployment/nodejs-app --timeout=30s
           kubectl get pods
           sleep 300
           echo "Pod name: $POD"
