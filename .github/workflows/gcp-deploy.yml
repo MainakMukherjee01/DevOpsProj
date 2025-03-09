@@ -72,3 +72,5 @@ jobs:
           env: standard
           instance_class: F1" > app.yaml
           gcloud app deploy --quiet
+      - name: Install Dependencies
+        run: npm clean-install --omit=dev
