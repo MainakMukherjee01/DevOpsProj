@@ -66,13 +66,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: Stage
     steps:
+      - uses: actions/checkout@v3
+
       - name: Install Dependencies
         run: npm install
 
       - name : Install express
         run: npm install express
-
-      - uses: actions/checkout@v3
+        
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
@@ -82,6 +83,6 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
-        
+
       - name : Install express
         run: npm install express
