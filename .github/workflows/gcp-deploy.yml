@@ -12,6 +12,9 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
+        
+      - name : Install express
+        run: npm install express
 
       - name: Run Vulnerability Scan (npm audit)
         run: npm audit
@@ -68,9 +71,12 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Deploy to App Engine
         run: |
+          npm install
+          npm install express
           echo "runtime: nodejs22
           env: standard
           instance_class: F1" > app.yaml
           gcloud app deploy --quiet
+
       - name: Install Dependencies
-        run: npm clean-install --omit=dev
+        run: npm clean-install
