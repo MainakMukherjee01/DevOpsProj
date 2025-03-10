@@ -2,7 +2,7 @@ name: Build and Deploy with Docker and K3d
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dockerize ]
 
 jobs:
   SecurityQuality:
