@@ -44,8 +44,9 @@ jobs:
     needs: Init
     steps:
       - uses: actions/checkout@v3
-      - name: GCP Build
-        run: echo "No build step required for GCP App Engine deployment"
+      - name: Set lowercase repository name
+        id: setrepo
+        run: echo "REPO=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
   Stage:
     runs-on: ubuntu-latest
@@ -69,14 +70,10 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-      - name: Deploy to App Engine
+      - name: Deploy to Google Cloud Run
         run: |
-          npm install
-          npm install express
-          echo "runtime: nodejs22
-          env: standard
-          instance_class: F1" > app.yaml
-          gcloud app deploy --quiet
-
-      - name: Install Dependencies
-        run: npm clean-install
+          gcloud run deploy myapp \
+            --image ghcr.io/${{ env.REPO }}:${{ github.sha }} \
+            --region ${{ secrets.GCP_REGION }} \
+            --platform managed \
+            --quiet

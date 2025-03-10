@@ -39,31 +39,14 @@ jobs:
       - name: AWS Init
         run: echo "Initializing AWS deployment..."
 
-      - name: Install Dependencies
-        run: npm install
-        
-      - name : Install express
-        run: npm install express
-
   Build:
     runs-on: ubuntu-latest
     needs: Init
     steps:
       - uses: actions/checkout@v3
-
-      - name: Install Dependencies
-        run: npm install
-        
-      - name : Install express
-        run: npm install express
-
-      - name: Generate Deployment Package
-        run: zip -r deploy.zip * -x "*.git*"
-      - name: Upload Deployment Package
-        uses: actions/upload-artifact@v4
-        with:
-          name: deploy-zip
-          path: deploy.zip
+      - name: Set lowercase repository name
+        id: setrepo
+        run: echo "REPO=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
   Stage:
     runs-on: ubuntu-latest
@@ -79,16 +62,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Dependencies
-        run: npm install
-        
-      - name : Install express
-        run: npm install express
-        
-      - name: Download Deployment Package
-        uses: actions/download-artifact@v4
+      - name: Authenticate to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          name: deploy-zip
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
         with:
@@ -98,11 +78,5 @@ jobs:
           environment_name: DevOps-env-1
           region: ap-south-1
           version_label: ${{ github.sha }}
-          deployment_package: deploy.zip
+          image: ghcr.io/${{ env.REPO }}:${{ github.sha }}
           wait_for_environment_recovery: 60
-
-      - name: Install Dependencies
-        run: npm install
-        
-      - name : Install express
-        run: npm install express
