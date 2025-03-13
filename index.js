@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 
-app.get('/', (req, res) => res.send('Hello, Multi-Cloud CI/CD!'));
+app.get('/', (req, res) => res.send('Hello, This is new Multi-Cloud CI/CD!'));
 
 app.get('/health', (req, res) => {
   const healthCheck = {
